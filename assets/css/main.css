@@ -1,0 +1,42 @@
+p {
+	margin-top: 0;
+}
+
+.message-holder {
+	font-size: 20px;
+	margin-bottom: 20px;
+}
+
+.text-danger {
+	color: #F00;
+}
+
+.text-success {
+	color: #70b971;
+}
+
+#progress-holder {
+	margin-top: 20px;
+	padding: 20px;
+	border: 1px solid #000000;
+}
+
+#progress-holder .spinner {
+	float: none;
+	margin: 0;
+}
+
+#progress-holder .progress {
+	display: inline-block;
+	margin-left: 5px;
+	line-height: 20px;
+	vertical-align: middle;
+}
+
+#progress-holder  #success-message {
+	font-size: 20px;
+}
+
+#locked-scores-holder {
+	margin-top: 40px;
+}
