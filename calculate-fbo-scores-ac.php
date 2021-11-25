@@ -49,20 +49,23 @@ class FBO_Calculate_Scores {
 	private function count_users() {
 		global $wpdb;
 
-		$sql = "SELECT COUNT(*) FROM fbo_users";
+		$sql = "SELECT COUNT(*) 
+FROM fbo_users
+WHERE fbo_users.user_id NOT IN (
+  SELECT DISTINCT user_id FROM wp_usermeta WHERE meta_key = 'wfls-last-login'
+)";
 
-		return $wpdb->get_var(
-			$wpdb->prepare(
-				$sql,null
-			)
-		);
+		return $wpdb->get_var($sql);
 	}
 
 	private function get_users( $offset, $limit ) {
 		global $wpdb;
 
 		$sql = "SELECT user_id, winners
-		FROM fbo_users
+FROM fbo_users
+WHERE fbo_users.user_id NOT IN (
+  SELECT DISTINCT user_id FROM wp_usermeta WHERE meta_key = 'wfls-last-login'
+)
 		LIMIT %d, %d";
 
 		return $wpdb->get_results(
@@ -104,23 +107,20 @@ class FBO_Calculate_Scores {
 					if ( get_field( 'last_week', $week_id ) && $user->winners ) {
 
 						$winners = unserialize( $user->winners );
-						if (is_array($winners))
-            {
-                // One of the user's overall winner choices won the series
-                if (in_array(get_field('best_baker', $week_id), $winners))
-                {
-                    $weekly_score += $points['overall_winner'];
-                }
 
-                // One of the user's overall winner choices was a runnerup in the final
-                if (in_array(get_field('runnerup_1', $week_id), $winners))
-                {
-                    $weekly_score += $points['overall_runnerup'];
-                }
-                if (in_array(get_field('runnerup_2', $week_id), $winners))
-                {
-                    $weekly_score += $points['overall_runnerup'];
-                }
+						if (is_array($winners)){
+              // One of the user's overall winner choices won the series
+              if( in_array( get_field( 'best_baker', $week_id ), $winners ) ) {
+                $weekly_score += $points['overall_winner'];
+              }
+
+              // One of the user's overall winner choices was a runnerup in the final
+              if( in_array( get_field( 'runnerup_1', $week_id ), $winners ) ) {
+                $weekly_score += $points['overall_runnerup'];
+              }
+              if( in_array( get_field( 'runnerup_2', $week_id ), $winners ) ) {
+                $weekly_score += $points['overall_runnerup'];
+              }
             }
 					}
 
@@ -134,6 +134,7 @@ class FBO_Calculate_Scores {
 					// week_id - 434 was the first week of the 2016 show when the site went down, the client didnt want anyone to have -2 points for not making a nomination
 					// if( $week_id != 434 && $week_data->best_baker_result && !$week_data->best_baker && ( ( $week_data->technical_result && !$week_data->technical ) || get_field( 'last_week', $week_id ) ) && ( ( $week_data->eliminated_result && !$week_data->eliminated ) || get_field( 'last_week', $week_id ) ) && !$week_data->bonus ) {
 					// 	$weekly_score -= 2;
+
 					// }
 
 					if( !Roots\Sage\Users\has_week_nominations( $user->user_id, $week_id ) )

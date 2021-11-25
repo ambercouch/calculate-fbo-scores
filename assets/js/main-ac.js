@@ -2,6 +2,10 @@
 
 	function calculate_scores(current_request, total_requests, rows_per_request) {
 
+		// current_request = 345;
+		// total_requests = 345;
+
+
 		var rows_offset = ( current_request == 1 ? 0 : ( ( current_request - 1 ) * rows_per_request ) );
 		var first_request = ( current_request == 1 ? true : false );
 		var last_request = ( current_request == total_requests ? true : false );
@@ -23,9 +27,12 @@
 			data: data,
 			type: 'post',
 			success: function(response) {
+				console.log('Some success current');
+				console.log(current_request);
+				console.log(response);
 				if (response.success) {
 
-					$('#progress-holder .progress span').text( percentage.toFixed(2) );
+						$('#progress-holder .progress span').text( current_request + ' Of ' + total_requests + '=' + percentage.toFixed(2) );
 
 					if(last_request) {
 						window.location = refresh_url + '&success';
@@ -34,6 +41,16 @@
 					}
 				}else{
 					window.location = refresh_url + '&error=' + encodeURI(response.data);
+				}
+			},
+			error: function (response) {
+				console.log('Some error current');
+				console.log(current_request);
+				console.log(response);
+				if(last_request) {
+					window.location = refresh_url + '&success';
+				}else{
+					calculate_scores(current_request + 1, total_requests, rows_per_request);
 				}
 			}
 		});
