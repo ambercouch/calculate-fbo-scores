@@ -51,11 +51,7 @@ class FBO_Calculate_Scores {
 
 		$sql = "SELECT COUNT(*) FROM fbo_users";
 
-		return $wpdb->get_var(
-			$wpdb->prepare(
-				$sql,null
-			)
-		);
+		return $wpdb->get_var($sql);
 	}
 
 	private function get_users( $offset, $limit ) {
