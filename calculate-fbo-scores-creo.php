@@ -20,7 +20,7 @@ class FBO_Calculate_Scores {
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_scripts' ) );
 
 		add_action( 'wp_ajax_fbo_calculate_scores', array( $this, 'ajax_calculate_scores' ) );
-		add_action( 'wp_ajax_nopriv_fbo_calculate_scores', array( $this, 'ajax_calculate_scores' ) );
+		add_action( 'wp_ajax_nopriv_fbo_calculate_scores', array( $this, 'ajax_calculate_scores' ) );	
 	}
 
 	public static function instance() {
@@ -45,37 +45,34 @@ class FBO_Calculate_Scores {
 		}
 	}
 
-    private function count_users() {
-        global $wpdb;
 
-        // count fbo users from the membership pro table
-        $sql = "SELECT COUNT(DISTINCT fbo_users.user_id)
-            FROM fbo_users
-            INNER JOIN wp_pmpro_memberships_users ON fbo_users.user_id = wp_pmpro_memberships_users.user_id";
+	private function count_users() {
+		global $wpdb;
 
-        return $wpdb->get_var($sql);
-    }
+		$sql = "SELECT COUNT(*) FROM fbo_users";
 
-    private function get_users($offset, $limit) {
-        global $wpdb;
+		return $wpdb->get_var(
+			$wpdb->prepare(
+				$sql,null
+			)
+		);
+	}
 
-        // get fbo users from the membership pro table
-        $sql = "SELECT fbo_users.user_id, fbo_users.winners
-            FROM fbo_users
-            WHERE fbo_users.user_id IN (
-                SELECT DISTINCT user_id
-                FROM wp_pmpro_memberships_users
-            )
-            LIMIT %d, %d";
+	private function get_users( $offset, $limit ) {
+		global $wpdb;
 
-        return $wpdb->get_results(
-            $wpdb->prepare(
-                $sql,
-                $offset,
-                $limit
-            )
-        );
-    }
+		$sql = "SELECT user_id, winners
+		FROM fbo_users
+		LIMIT %d, %d";
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				$sql,
+				$offset,
+				$limit
+			)
+		);
+	}
 
 	private function get_weeks() {
 
@@ -108,20 +105,18 @@ class FBO_Calculate_Scores {
 
 						$winners = unserialize( $user->winners );
 
-						if (is_array($winners)){
-              // One of the user's overall winner choices won the series
-              if( in_array( get_field( 'best_baker', $week_id ), $winners ) ) {
-                $weekly_score += $points['overall_winner'];
-              }
+						// One of the user's overall winner choices won the series
+						if( in_array( get_field( 'best_baker', $week_id ), $winners ) ) {
+							$weekly_score += $points['overall_winner'];
+						}
 
-              // One of the user's overall winner choices was a runnerup in the final
-              if( in_array( get_field( 'runnerup_1', $week_id ), $winners ) ) {
-                $weekly_score += $points['overall_runnerup'];
-              }
-              if( in_array( get_field( 'runnerup_2', $week_id ), $winners ) ) {
-                $weekly_score += $points['overall_runnerup'];
-              }
-            }
+						// One of the user's overall winner choices was a runnerup in the final
+						if( in_array( get_field( 'runnerup_1', $week_id ), $winners ) ) {
+							$weekly_score += $points['overall_runnerup'];
+						}
+						if( in_array( get_field( 'runnerup_2', $week_id ), $winners ) ) {
+							$weekly_score += $points['overall_runnerup'];
+						}
 					}
 
 					$week_data = Roots\Sage\Users\get_week_categories_data( $user->user_id, $week_id, true );
@@ -134,7 +129,6 @@ class FBO_Calculate_Scores {
 					// week_id - 434 was the first week of the 2016 show when the site went down, the client didnt want anyone to have -2 points for not making a nomination
 					// if( $week_id != 434 && $week_data->best_baker_result && !$week_data->best_baker && ( ( $week_data->technical_result && !$week_data->technical ) || get_field( 'last_week', $week_id ) ) && ( ( $week_data->eliminated_result && !$week_data->eliminated ) || get_field( 'last_week', $week_id ) ) && !$week_data->bonus ) {
 					// 	$weekly_score -= 2;
-
 					// }
 
 					if( !Roots\Sage\Users\has_week_nominations( $user->user_id, $week_id ) )
@@ -226,7 +220,7 @@ class FBO_Calculate_Scores {
 			<?php endif; ?>
 		</div>
 
-		<?php
+		<?php	
 	}
 
 }
